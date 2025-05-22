@@ -1,0 +1,22 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+.env # 環境変数ファイルはコミットしない
+
+# Build artifacts
+dist/ # TypeScriptをビルドする場合の出力ディレクトリ
+build/ # React (Vite) のビルド出力ディレクトリ
+
+# OS generated files
+.DS_Store # macOS
+Thumbs.db # Windows
+
+# IDE files
+.vscode/ # VS Code 設定 (共有しない場合)
+.idea/ # WebStorm/IntelliJ IDEA
+
+# logs
+*.log
