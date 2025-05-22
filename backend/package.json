@@ -1,0 +1,23 @@
+{
+  "name": "knowit-backend",
+  "version": "1.0.0",
+  "description": "Backend for KnowIt application",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "tsc"
+  },
+  "author": "Kohei Agata",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
