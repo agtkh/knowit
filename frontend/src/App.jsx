@@ -7,11 +7,11 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import FolderListPage from './pages/FolderListPage';
 import FolderEditPage from './pages/FolderEditPage';
-import AddQuestionPage from './pages/AddQuestionPage'; // AddQuestionPage をインポート
-import QuestionEditPage from './pages/QuestionEditPage'; // QuestionEditPage をインポート
+import AddQuestionPage from './pages/AddQuestionPage';
+import QuestionEditPage from './pages/QuestionEditPage';
 import PlayStartPage from './pages/PlayStartPage';
 import PlayPage from './pages/PlayPage'; 
-import PlayResultPage from './pages/PlayResultPage'; // PlayResultPage をインポート
+import PlayResultPage from './pages/PlayResultPage';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,6 +30,8 @@ const App = () => {
     localStorage.setItem('authToken', token);
     setIsLoggedIn(true);
   };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <Router>
@@ -63,13 +65,13 @@ const App = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/folders" element={isLoggedIn ? <FolderListPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/folders/:id/edit" element={isLoggedIn ? <FolderEditPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/folders/:id/add-question" element={isLoggedIn ? <AddQuestionPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} /> {/* 質問追加ページのルーティング */}
-          <Route path="/play/start/:folderId" element={<PlayStartPage />} /> {/* パスとコンポーネント名を更新 */}
-          <Route path="/play/:folderId" element={<PlayPage />} /> {/* パスとコンポーネント名を更新 */}
-          <Route path="/play/result" element={<PlayResultPage />} /> {/* パスとコンポーネント名を更新 */}
+          <Route path="/folders/:id/add-question" element={isLoggedIn ? <AddQuestionPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} /> 
           {isLoggedIn && (
             <>
               <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
+              <Route path="/play/start/:folderId" element={<PlayStartPage />} />
+              <Route path="/play/:folderId" element={<PlayPage />} />
+              <Route path="/play/result" element={<PlayResultPage />} />
             </>
           )}
         </Routes>
@@ -77,11 +79,11 @@ const App = () => {
 
       <footer className="bg-light py-3 mt-auto">
         <Container className="text-center">
-          <p>&copy; 2025 KnowIt - 開発: Your Name</p>
+          <p>&copy; {(currentYear == 2025) ? 2025 : "2025 - " + currentYear} KnowIt - Kohei Agata</p>
           <div className="mt-2">
-            <a href="https://twitter.com/your_twitter" target="_blank" rel="noopener noreferrer" className="me-2">Twitter</a>
-            <a href="https://github.com/your_github" target="_blank" rel="noopener noreferrer" className="me-2">GitHub</a>
-            <p className="mt-2">お問い合わせ: your_email@example.com</p>
+            {/* <a href="https://twitter.com/your_twitter" target="_blank" rel="noopener noreferrer" className="me-2">Twitter</a> */}
+            <a href="https://github.com/agtkh" target="_blank" rel="noopener noreferrer" className="me-2">GitHub</a>
+            {/* <p className="mt-2">お問い合わせ: kohei</p> */}
           </div>
         </Container>
       </footer>

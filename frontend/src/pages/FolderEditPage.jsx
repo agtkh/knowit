@@ -434,8 +434,8 @@ const FolderEditPage = () => {
             <th onClick={() => requestQuestionSort('incorrect_count')} style={{ cursor: 'pointer' }}>
               誤答数 {questionSortConfig.key === 'incorrect_count' && (questionSortConfig.direction === 'ascending' ? '▲' : '▼')}
             </th>
-            <th onClick={() => requestQuestionSort('correct_count')} style={{ cursor: 'pointer' }}>
-              正答率 {questionSortConfig.key === 'correct_count' && (questionSortConfig.direction === 'ascending' ? '▲' : '▼')}
+            <th onClick={() => requestQuestionSort('correct_rate')} style={{ cursor: 'pointer' }}>
+              正答率 {questionSortConfig.key === 'correct_rate' && (questionSortConfig.direction === 'ascending' ? '▲' : '▼')}
             </th>
             <th onClick={() => requestQuestionSort('last_answered_at')} style={{ cursor: 'pointer' }}>
               最終回答日時 {questionSortConfig.key === 'last_answered_at' && (questionSortConfig.direction === 'ascending' ? '▲' : '▼')}
@@ -445,14 +445,15 @@ const FolderEditPage = () => {
         </thead>
         <tbody>
           {filteredQuestions.map(question => (
-            <tr key={question.id} onClick={() => handleShowQuestionDetailModal(question)} style={{ cursor: 'pointer' }}>
+            <tr key={question.id} style={{ cursor: 'pointer' }}>
               <td>{question.id}</td>
               <td>{question.question_text}</td>
               <td>{question.correct_count}</td>
               <td>{question.incorrect_count}</td>
-              <td>{(question.correct_count + question.incorrect_count) > 0 ? ((question.correct_count / (question.correct_count + question.incorrect_count)) * 100).toFixed(2) + '%' : '-'}</td>
+              <td>{Number(question.correct_rate).toFixed(2)}</td>
               <td>{question.last_answered_at ? moment(question.last_answered_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</td>
               <td>
+                <Button variant="danger" size="sm" onClick={() => handleShowQuestionDetailModal(question)}>回答</Button>
                 <Dropdown>
                   <Dropdown.Toggle variant="outline-secondary" size="sm">
                     操作

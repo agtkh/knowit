@@ -252,12 +252,12 @@ const FolderListPage = () => {
               <td>{folder.folder_name}</td>
               <td>{folder.question_count || 0}</td>
               <td>
+                {folder.question_count > 0 && ( // 問題数が 0 より大きい場合のみ Play ボタンを表示
+                  <Link to={`/play/start/${folder.id}`} className="btn btn-sm btn-primary me-2">プレイ</Link>
+                )}
                 <Button as={Link} to={`/folders/${folder.id}/edit`} variant="info" size="sm" className="me-2">編集</Button>
                 <Button variant="success" size="sm" className="me-2" onClick={() => handleShowCopyModal(folder)}>コピー</Button>
-                {folder.question_count > 0 && ( // 問題数が 0 より大きい場合のみ Play ボタンを表示
-                  <Link to={`/play/start/${folder.id}`} className="btn btn-sm btn-primary">Play</Link>
-                )}
-                <Button variant="danger" size="sm" onClick={() => handleShowDeleteModal(folder)}>削除</Button>
+                <Button variant="danger" size="sm" className="" onClick={() => handleShowDeleteModal(folder)}>削除</Button>
               </td>
             </tr>
           ))}

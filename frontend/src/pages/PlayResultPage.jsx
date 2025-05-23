@@ -41,7 +41,7 @@ const PlayResultPage = () => {
                 </thead>
                 <tbody>
                   {answeredQuestions.map((item, index) => (
-                    <tr key={index}>
+                    <tr key={index} className={!item.userAnsweredCorrectly && 'table-danger'}>
                       <td>{item.questionText}</td>
                       <td>{item.correctAnswer}</td>
                       <td>{item.userAnsweredCorrectly ? '正解' : '不正解'}</td>
