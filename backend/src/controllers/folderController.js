@@ -128,6 +128,7 @@ const getQuestionsInFolder = async (req, res) => {
         folder_id,
         correct_count,
         incorrect_count,
+        CASE WHEN correct_count + incorrect_count = 0 THEN 0.0 ELSE (100.0 * correct_count / (correct_count + incorrect_count)) END AS correct_rate,
         last_answered_at
       FROM questions
       WHERE folder_id = $1
