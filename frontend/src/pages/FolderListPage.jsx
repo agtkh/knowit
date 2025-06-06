@@ -189,12 +189,12 @@ const FolderListPage = () => {
   // DataTable のカラム定義
   const columns = useMemo(
     () => [
-      {
-        name: 'ID',
-        selector: (row) => row.id,
-        sortable: true,
-        width: '80px',
-      },
+      // {
+      //   name: 'ID',
+      //   selector: (row) => row.id,
+      //   sortable: true,
+      //   width: '80px',
+      // },
       {
         name: 'フォルダ名',
         selector: (row) => row.folder_name,

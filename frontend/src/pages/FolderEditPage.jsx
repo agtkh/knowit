@@ -372,11 +372,10 @@ const FolderEditPage = () => {
   // DataTable のカラム定義
   const columns = useMemo(
     () => [
-      // ID カラムを削除
       {
         name: '質問内容',
         selector: (row) => row.question_text,
-        sortable: true,
+        sortable: false,
       },
       {
         name: '総回答数',
@@ -542,6 +541,7 @@ const FolderEditPage = () => {
         selectableRows // これを追加してチェックボックスを表示
         onSelectedRowsChange={handleRowSelected} // 選択された行の変更を監視
         clearSelectedRows={toggledClearRows} // 選択状態をリセットするためのトリガー
+        onRowClicked={handleShowQuestionDetailModal} // 行をクリックしたときの処理
       />
 
       {/* 質問削除確認モーダル */}
@@ -554,8 +554,6 @@ const FolderEditPage = () => {
           {questionsToDelete.length > 0 ? (
             <p>
               本当に選択した {questionsToDelete.length} 件の質問を削除しますか？
-              <br />
-              {questionsToDelete.map(q => `"${q.question_text}"`).join(', ')}
             </p>
           ) : (
             <p>削除する質問が選択されていません。</p>
