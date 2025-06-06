@@ -305,9 +305,9 @@ const FolderEditPage = () => {
       })).filter(q => q.question_text && q.answer);
 
       if (questionsToImport.length === 0) {
-          setImportError('CSV ファイルに有効な質問データが見つかりませんでした。');
-          setIsImporting(false);
-          return;
+        setImportError('CSV ファイルに有効な質問データが見つかりませんでした。');
+        setIsImporting(false);
+        return;
       }
 
       try {
@@ -402,26 +402,44 @@ const FolderEditPage = () => {
             <Button variant="danger" size="sm" onClick={() => handleShowQuestionDetailModal(row)} className="me-2">
               回答
             </Button>
-            <Dropdown>
-              <Dropdown.Toggle variant="outline-secondary" size="sm">
-                操作
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item as={Link} to={`/questions/${row.id}/edit`}>編集</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleShowMoveCopyModal(row, 'move')}>移動</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleShowMoveCopyModal(row, 'copy')}>コピー</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={() => handleShowDeleteQuestionModal(row)} className="text-danger">
-                  削除
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+            <Button
+              as={Link}
+              to={`/questions/${row.id}/edit`}
+              variant="primary"
+              size="sm"
+              className="me-1"
+            >
+              編集
+            </Button>
+            <Button
+              variant="info"
+              size="sm"
+              onClick={() => handleShowMoveCopyModal(row, 'move')}
+              className="me-1"
+            >
+              移動
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => handleShowMoveCopyModal(row, 'copy')}
+              className="me-1"
+            >
+              コピー
+            </Button>
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={() => handleShowDeleteQuestionModal(row)}
+            >
+              削除
+            </Button>
           </>
         ),
         ignoreRowClick: true,
         allowOverflow: true,
         button: true,
-        width: '250px',
+        width: '350px',
       },
     ],
     [],
