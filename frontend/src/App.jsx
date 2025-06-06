@@ -1,7 +1,7 @@
 // frontend/src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Container, Navbar, Nav, Button } from 'react-bootstrap';
+import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
@@ -45,7 +45,11 @@ const App = () => {
               {isLoggedIn ? (
                 <>
                   <Nav.Link as={Link} to="/folders">フォルダ</Nav.Link>
-                  <Button variant="outline-danger" onClick={handleLogout} className="ms-2">ログアウト</Button>
+                  <NavDropdown title="アカウント" id="account-dropdown" align="end">
+                    <NavDropdown.Item as="button" className="text-danger p-0" onClick={handleLogout}>
+                      ログアウト
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 </>
               ) : (
                 <>
