@@ -8,10 +8,13 @@ const PlayStartPage = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
   const [folderName, setFolderName] = useState('');
-  const [questionCount, setQuestionCount] = useState(0); // デフォルトは 0 に設定
+  const [questionCount, setQuestionCount] = useState(0);
   const [maxQuestionCount, setMaxQuestionCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // 1. 出題モードを管理する state を追加
+  const [playMode, setPlayMode] = useState('question-to-answer'); // 'question-to-answer' をデフォルトに設定
 
   useEffect(() => {
     const fetchFolderDetails = async () => {
@@ -30,7 +33,7 @@ const PlayStartPage = () => {
           },
         });
         setMaxQuestionCount(questionsResponse.data.count);
-        setQuestionCount(questionsResponse.data.count); // デフォルトを最大質問数に設定
+        setQuestionCount(questionsResponse.data.count);
         setLoading(false);
       } catch (error) {
         console.error('フォルダ詳細または問題数の取得に失敗しました:', error);
@@ -44,15 +47,17 @@ const PlayStartPage = () => {
 
   const handleQuestionCountChange = (e) => {
     const value = parseInt(e.target.value, 10);
-    setQuestionCount(Math.max(1, Math.min(value, maxQuestionCount))); // 最小1, 最大問題数
+    setQuestionCount(Math.max(1, Math.min(value, maxQuestionCount)));
   };
 
+  // 2. スタート時の処理を修正
   const handleStartPlay = () => {
-    navigate(`/play/${folderId}?count=${questionCount}`);
+    // URLに選択されたモードの情報を追加して、Playページに渡す
+    navigate(`/play/${folderId}?count=${questionCount}&mode=${playMode}`);
   };
 
   const handleCancelPlay = () => {
-    navigate('/folders'); // フォルダ一覧へ戻る
+    navigate('/folders');
   };
 
   if (loading) {
@@ -72,6 +77,33 @@ const PlayStartPage = () => {
         <Card.Body>
           <p>このフォルダには <strong>{maxQuestionCount}</strong> 件の質問があります。</p>
           <Form>
+            {/* 3. 出題モードを選択するUIを追加 */}
+            <Form.Group className="mb-3">
+              <Form.Label>出題モード</Form.Label>
+              <div>
+                <Form.Check
+                  inline
+                  type="radio"
+                  label="問題 → 解答"
+                  name="playMode"
+                  value="question-to-answer"
+                  checked={playMode === 'question-to-answer'}
+                  onChange={(e) => setPlayMode(e.target.value)}
+                  id="mode-q-to-a"
+                />
+                <Form.Check
+                  inline
+                  type="radio"
+                  label="解答 → 問題"
+                  name="playMode"
+                  value="answer-to-question"
+                  checked={playMode === 'answer-to-question'}
+                  onChange={(e) => setPlayMode(e.target.value)}
+                  id="mode-a-to-q"
+                />
+              </div>
+            </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>出題数</Form.Label>
               <Form.Control

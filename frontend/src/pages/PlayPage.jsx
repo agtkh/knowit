@@ -14,7 +14,10 @@ const PlayPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
-  const [questionCount] = useState(parseInt(searchParams.get('count') || 10, 10)); // デフォルトは10問
+  const [questionCount] = useState(parseInt(searchParams.get('count') || 10, 10));
+  
+  // 1. URLから出題モードを取得
+  const [playMode] = useState(searchParams.get('mode') || 'question-to-answer'); // デフォルトは 'question-to-answer'
 
   useEffect(() => {
     const fetchPlayQuestions = async () => {
@@ -49,6 +52,7 @@ const PlayPage = () => {
   const handleAnswer = async (isCorrect) => {
     if (!currentQuestion) return;
 
+    // 結果画面に渡すデータは、表示モードに関わらず元の形式で保存する
     const answeredQuestion = {
       questionId: currentQuestion.id,
       questionText: currentQuestion.question_text,
@@ -68,24 +72,24 @@ const PlayPage = () => {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      // 回答結果の処理が成功した場合の処理 (必要に応じて)
     } catch (error) {
       console.error('回答結果の送信に失敗しました:', error);
-      // エラー処理 (必要に応じて)
     }
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // 全問回答済みの場合も結果画面へ遷移
       navigate('/play/result', { state: { answeredQuestions } });
     }
   };
 
   const handleQuitPlay = () => {
-    // 途中でやめた場合も、その時点までの回答結果を渡して結果画面へ遷移
     navigate('/play/result', { state: { answeredQuestions } });
   };
+
+  // 2. 表示する問題と解答のテキストを定義
+  const questionText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.answer : currentQuestion.question_text) : '';
+  const answerText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.question_text : currentQuestion.answer) : '';
 
   return (
     <Container className="mt-5">
@@ -100,7 +104,8 @@ const PlayPage = () => {
             <div className="text-danger">{error}</div>
           ) : currentQuestion ? (
             <>
-              <h2>{currentQuestion.question_text}</h2>
+              {/* 3. モードに応じて入れ替えたテキストを表示 */}
+              <h2>{questionText}</h2>
               <div className="mt-3">
                 {!showAnswer ? (
                   <Button variant="outline-info" onClick={handleShowAnswer}>
@@ -108,7 +113,7 @@ const PlayPage = () => {
                   </Button>
                 ) : (
                   <div>
-                    <p className="alert alert-info">{currentQuestion.answer}</p>
+                    <p className="alert alert-info">{answerText}</p>
                     <Button variant="success" className="me-2" onClick={() => handleAnswer(true)}>
                       正解
                     </Button>
