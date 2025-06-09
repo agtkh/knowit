@@ -7,7 +7,7 @@ const questionRoutes = require('./routes/questionRoutes');
 const geminiRoutes = require('./routes/geminiRoutes');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.KNOWIT_PORT || 3001;
 
 // CORSミドルウェアを適用 (必要に応じて設定)
 app.use(cors());
