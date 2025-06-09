@@ -169,6 +169,16 @@ const moveMultipleQuestions = async (req, res) => {
       return res.status(403).json({ message: 'フォルダが見つからないか、アクセス権がありません。' });
     }
 
+    // 移動元フォルダに属する質問を確認
+    const questionCheck = await client.query(
+      `SELECT id FROM questions WHERE id = ANY($1::int[]) AND folder_id = $2`,
+      [question_ids, source_folder_id]
+    );
+    if (questionCheck.rowCount !== question_ids.length) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ message: '一部の移動対象質問が見つからないか、権限がありません。' });
+    }
+
     const updateResult = await client.query(
       `UPDATE questions SET folder_id = $1 WHERE id = ANY($2::int[]) AND folder_id = $3`,
       [target_folder_id, question_ids, source_folder_id]
@@ -215,7 +225,7 @@ const copyMultipleQuestions = async (req, res) => {
 
     if (originalQuestionsResult.rows.length !== question_ids.length) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ message: '一部のコピー対象質問が見つからないか、権限がありません。' });
+      return res.status(403).json({ message: '一部のコピー対象質問が見つからないか、権限がありません。' });
     }
 
     let copiedCount = 0;

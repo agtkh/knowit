@@ -8,7 +8,10 @@
     "dev": "export $(cat .env) && concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
-    "build": "export $(cat .env) && concurrently \"npm run build:frontend\" \"npm run build:backend\""
+    "build": "export $(cat .env) && concurrently \"npm run build:frontend\" \"npm run build:backend\"",
+    "test:frontend": "cd frontend && npm run test",
+    "test:backend": "cd backend && npm run test",
+    "test": "export $(cat .env) && concurrently \"npm run test:frontend\" \"npm run test:backend\""
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.3.1",

@@ -59,6 +59,7 @@ describe('Question API (Protected)', () => {
 
             // 権限がないので404が返る
             expect(response.statusCode).toBe(404);
+            expect(response.body.message).toBe('指定された質問が見つからないか、削除する権限がありません。');
 
             // 他人の質問が削除されていないことを確認
             const dbCheck = await pool.query('SELECT * FROM questions WHERE id = $1', [otherQuestionId]);
@@ -153,6 +154,47 @@ describe('Question API (Protected)', () => {
                 expect(q.folder_id).toBe(targetFolderId);
             });
         });
+
+        it('他人のフォルダに属する質問は移動できないこと', async () => {
+            // 他人のフォルダに質問を作成
+            const otherQ = await pool.query('INSERT INTO questions (folder_id, question_text, answer) VALUES ($1, $2, $3) RETURNING id', [otherUser.folderId, '他人の質問', '他人の答え']);
+            const otherQuestionId = otherQ.rows[0].id;
+
+            // 自分のトークンで他人の質問を移動しようとする
+            const response = await request(app)
+                .post('/api/questions/move-multiple')
+                .set('Authorization', `Bearer ${primaryUser.token}`)
+                .send({
+                    question_ids: [otherQuestionId],
+                    source_folder_id: otherUser.folderId,
+                    target_folder_id: targetFolderId,
+                });
+
+            // 権限がないので403が返る
+            expect(response.statusCode).toBe(403);
+
+            // 他人の質問が移動されていないことを確認
+            const dbCheck = await pool.query('SELECT * FROM questions WHERE id = $1', [otherQuestionId]);
+            expect(dbCheck.rowCount).toBe(1);
+            expect(dbCheck.rows[0].folder_id).toBe(otherUser.folderId);
+        });
+
+        it('移動元フォルダに存在しない質問は移動できないこと', async () => {
+            // 存在しない質問IDを指定
+            const invalidQuestionId = 999999;
+
+            const response = await request(app)
+                .post('/api/questions/move-multiple')
+                .set('Authorization', `Bearer ${primaryUser.token}`)
+                .send({
+                    question_ids: [invalidQuestionId],
+                    source_folder_id: sourceFolderId,
+                    target_folder_id: targetFolderId,
+                });
+
+            expect(response.statusCode).toBe(403);
+            expect(response.body.message).toContain('一部の移動対象質問が見つからないか、権限がありません。');
+        });
     });
 
     // 複数質問のコピーテスト
@@ -186,6 +228,45 @@ describe('Question API (Protected)', () => {
             const targetCount = await pool.query('SELECT COUNT(*) FROM questions WHERE folder_id = $1', [targetFolderId]);
             expect(parseInt(sourceCount.rows[0].count, 10)).toBe(1); // 元の質問は残っている
             expect(parseInt(targetCount.rows[0].count, 10)).toBe(1); // 新しい質問がコピーされている
+        });
+
+        it('他人のフォルダに属する質問はコピーできないこと', async () => {
+            // 他人のフォルダに質問を作成
+            const otherQ = await pool.query('INSERT INTO questions (folder_id, question_text, answer) VALUES ($1, $2, $3) RETURNING id', [otherUser.folderId, '他人の質問', '他人の答え']);
+            const otherQuestionId = otherQ.rows[0].id;
+
+            // 自分のトークンで他人の質問をコピーしようとする
+            const response = await request(app)
+                .post('/api/questions/copy-multiple')
+                .set('Authorization', `Bearer ${primaryUser.token}`)
+                .send({
+                    question_ids: [otherQuestionId],
+                    target_folder_id: targetFolderId,
+                });
+
+            // 権限がないので403が返る
+            expect(response.statusCode).toBe(403);
+
+            // 他人の質問がコピーされていないことを確認
+            const dbCheck = await pool.query('SELECT * FROM questions WHERE id = $1', [otherQuestionId]);
+            expect(dbCheck.rowCount).toBe(1);
+            expect(dbCheck.rows[0].folder_id).toBe(otherUser.folderId);
+        });
+
+        it('コピー元フォルダに存在しない質問はコピーできないこと', async () => {
+            // 存在しない質問IDを指定
+            const invalidQuestionId = 999999;
+
+            const response = await request(app)
+                .post('/api/questions/copy-multiple')
+                .set('Authorization', `Bearer ${primaryUser.token}`)
+                .send({
+                    question_ids: [invalidQuestionId],
+                    target_folder_id: targetFolderId,
+                });
+
+            expect(response.statusCode).toBe(403);
+            expect(response.body.message).toContain('一部のコピー対象質問が見つからないか、権限がありません。');
         });
     });
 });
