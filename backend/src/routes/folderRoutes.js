@@ -22,9 +22,6 @@ router.get('/:folderId/questions/count', folderController.getQuestionCount);
 router.get('/play/:folderId', folderController.getPlayQuestions);
 router.post('/:id/import-csv', folderController.importQuestionsFromCsv);
 
-router.post('/:folderId/questions/delete-multiple', folderController.deleteMultipleQuestions);
-router.put('/:folderId/questions/move-multiple', folderController.moveMultipleQuestions);
-router.post('/:targetFolderId/questions/copy-multiple', folderController.copyMultipleQuestions);
 
 
 module.exports = router;
