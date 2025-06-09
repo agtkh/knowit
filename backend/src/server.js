@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const folderRoutes = require('./routes/folderRoutes');
 const questionRoutes = require('./routes/questionRoutes');
+const geminiRoutes = require('./routes/geminiRoutes');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,6 +19,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/folders', folderRoutes);
 app.use('/api/questions', questionRoutes);
+app.use('/api/gemini', geminiRoutes);
+
 
 if (require.main === module) {
   app.listen(port, () => {

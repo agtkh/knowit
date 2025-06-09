@@ -20,7 +20,21 @@ describe('Question API (Protected)', () => {
         otherUser = { id: res2.body.user.id, token: token2, folderId: folderRes2.body.id };
     });
 
+        // 各テストの後に、作成された質問と一時的なフォルダを削除する
+    afterEach(async () => {
+        // 全ての質問を削除
+        await pool.query('DELETE FROM questions WHERE folder_id = ANY(SELECT id FROM folders WHERE owner_user_id = $1 OR owner_user_id = $2)', [primaryUser.id, otherUser.id]);
+        
+        // beforeAllで作成したメインフォルダ以外の一時フォルダを削除
+        await pool.query(
+            'DELETE FROM folders WHERE (owner_user_id = $1 OR owner_user_id = $2) AND id NOT IN ($3, $4)', 
+            [primaryUser.id, otherUser.id, primaryUser.folderId, otherUser.folderId]
+        );
+    });
+
     afterAll(async () => {
+        // 外部キー制約のため、フォルダを先に削除してからユーザーを削除する
+        await pool.query('DELETE FROM folders WHERE owner_user_id = $1 OR owner_user_id = $2', [primaryUser.id, otherUser.id]);
         await pool.query('DELETE FROM users WHERE id = $1 OR id = $2', [primaryUser.id, otherUser.id]);
         await pool.end();
     });

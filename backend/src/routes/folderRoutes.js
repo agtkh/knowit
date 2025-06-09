@@ -13,15 +13,10 @@ router.get('/:id', folderController.getFolderById);
 router.put('/:id', folderController.updateFolder);
 router.get('/:id/questions', folderController.getQuestionsInFolder);
 router.post('/:id/questions', folderController.addQuestionToFolder);
-router.delete('/:folderId/questions/:questionId', folderController.removeQuestionFromFolder);
 router.delete('/:id', folderController.deleteFolder);
-router.put('/:folderId/questions/:questionId/move', folderController.moveQuestionToFolder);
-router.post('/:targetFolderId/questions/copy', folderController.copyQuestionToFolder);
 router.post('/:folderId/copy', folderController.copyFolder);
 router.get('/:folderId/questions/count', folderController.getQuestionCount);
 router.get('/play/:folderId', folderController.getPlayQuestions);
 router.post('/:id/import-csv', folderController.importQuestionsFromCsv);
-
-
 
 module.exports = router;

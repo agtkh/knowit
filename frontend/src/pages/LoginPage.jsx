@@ -24,7 +24,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       // 親コンポーネントにトークンを渡す
       onLoginSuccess(token);
 
-      navigate('/');
+      navigate('/folders');
     } catch (error) {
       console.error('ログイン失敗:', error.response ? error.response.data : error.message);
       let errorMessage = 'ログインに失敗しました。ユーザー名またはパスワードが間違っている可能性があります。';
@@ -50,6 +50,7 @@ const LoginPage = ({ onLoginSuccess }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            autoComplete='username'
           />
         </Form.Group>
 
@@ -61,6 +62,7 @@ const LoginPage = ({ onLoginSuccess }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete='current-password'
           />
         </Form.Group>
         <Button variant="primary" type="submit">

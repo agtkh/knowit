@@ -387,78 +387,6 @@ const copyQuestionToFolder = async (req, res) => {
   }
 };
 
-// 特定のIDの質問を取得
-const getQuestionById = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id; // 認証されたユーザーのID
-
-  if (!id || isNaN(parseInt(id))) {
-    return res.status(400).json({ message: '無効な質問IDです。' });
-  }
-
-  try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        question_text,
-        answer,
-        explanation,
-        folder_id,
-        correct_count,
-        incorrect_count,
-        last_answered_at
-      FROM questions
-      WHERE id = $1
-      -- 必要であれば、質問が属するフォルダのオーナーが自分であるかを確認する処理を追加
-    `, [id]);
-
-    if (result.rows.length > 0) {
-      res.status(200).json(result.rows[0]);
-    } else {
-      res.status(404).json({ message: '指定された質問は見つかりませんでした。' });
-    }
-  } catch (error) {
-    console.error('質問詳細の取得に失敗しました:', error);
-    res.status(500).json({ message: '質問詳細の取得に失敗しました。' });
-  }
-};
-
-// 特定のIDの質問を更新
-const updateQuestion = async (req, res) => {
-  const { id } = req.params;
-  const { question_text, answer, explanation, folder_id } = req.body;
-  const userId = req.user.id; // 認証されたユーザーのID
-
-  if (!id || isNaN(parseInt(id))) {
-    return res.status(400).json({ message: '無効な質問IDです。' });
-  }
-  if (!question_text || !question_text.trim() || !answer || !answer.trim()) {
-    return res.status(400).json({ message: '質問と回答は必須です。' });
-  }
-
-  try {
-    // 必要であれば、質問が属するフォルダのオーナーが自分であるかを確認する処理を追加
-    const updateResult = await pool.query(
-      `
-      UPDATE questions
-      SET question_text = $1, answer = $2, explanation = $3, folder_id = $4
-      WHERE id = $5
-      -- 必要であれば、更新件数が0件の場合にエラーを返すなどの処理を追加
-      `,
-      [question_text, answer, explanation, folder_id, id]
-    );
-
-    if (updateResult.rowCount > 0) {
-      res.status(200).json({ message: '質問を更新しました。' });
-    } else {
-      res.status(404).json({ message: '指定された質問は見つかりませんでした。' });
-    }
-  } catch (error) {
-    console.error('質問の更新に失敗しました:', error);
-    res.status(500).json({ message: '質問の更新に失敗しました。' });
-  }
-};
-
 // 特定のフォルダに含まれる質問の数を取得
 const getQuestionCount = async (req, res) => {
   const { folderId } = req.params;
@@ -500,7 +428,7 @@ const getPlayQuestions = async (req, res) => {
 
     const result = await pool.query(
       `
-      SELECT id, question_text, answer
+      SELECT id, question_text, answer, explanation
       FROM questions
       WHERE folder_id = $1
       ORDER BY RANDOM()
@@ -557,12 +485,8 @@ module.exports = {
   updateFolder,
   deleteFolder,
   addQuestionToFolder,
-  moveQuestionToFolder,
-  copyQuestionToFolder,
   copyFolder,
   processAnswer,
-  getQuestionById,
-  updateQuestion,
   getQuestionCount,
   getPlayQuestions,
   importQuestionsFromCsv

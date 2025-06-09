@@ -227,8 +227,6 @@ const FolderListPage = () => {
           </>
         ),
         ignoreRowClick: true, // 行クリックイベントがこのセルには適用されないようにする
-        allowOverflow: true,
-        button: true,
         width: '300px', // ボタンの幅に合わせて調整
       },
     ],

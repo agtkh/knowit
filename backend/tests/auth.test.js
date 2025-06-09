@@ -11,6 +11,7 @@ describe('Auth API', () => {
 
   // 全てのテストが終了した後に、データベース接続を閉じる
   afterAll(async () => {
+    pool.query('DELETE FROM users'); // テスト後にテーブルをクリーンアップ
     await pool.end();
   });
 

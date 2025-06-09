@@ -163,7 +163,7 @@ const FolderEditPage = () => {
     try {
       const authToken = localStorage.getItem('authToken');
       // 選択された質問IDの配列をバックエンドに送信
-      await axios.post(`/api/folders/${folderId}/questions/delete-multiple`, {
+      await axios.post(`/api/questions/delete-multiple`, {
         question_ids: questionsToDelete.map(q => q.id),
       }, {
         headers: {
@@ -221,9 +221,10 @@ const FolderEditPage = () => {
     try {
       const authToken = localStorage.getItem('authToken');
       // 選択された質問IDの配列をバックエンドに送信
-      await axios.put(`/api/folders/${folderId}/questions/move-multiple`, {
+      await axios.post(`/api/questions/move-multiple`, {
         question_ids: questionsForMoveCopy.map(q => q.id),
         target_folder_id: targetFolderId,
+        source_folder_id: folderId, // 移動元のフォルダIDを送信
       }, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -249,8 +250,9 @@ const FolderEditPage = () => {
     try {
       const authToken = localStorage.getItem('authToken');
       // 選択された質問IDの配列をバックエンドに送信
-      await axios.post(`/api/folders/${targetFolderId}/questions/copy-multiple`, {
+      await axios.post(`/api/questions/copy-multiple`, {
         question_ids: questionsForMoveCopy.map(q => q.id),
+        target_folder_id: targetFolderId,
       }, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -437,8 +439,6 @@ const FolderEditPage = () => {
           </>
         ),
         ignoreRowClick: true,
-        allowOverflow: true,
-        button: true,
         width: '350px',
       },
     ],
@@ -606,7 +606,7 @@ const FolderEditPage = () => {
                 <p>{moveCopyAction === 'move' ? '移動' : 'コピー'}する質問が選択されていません。</p>
               )}
               <Form.Group controlId="targetFolder">
-                <Form.Label>移動/コピー 先フォルダ</Form.Label>
+                <Form.Label>{moveCopyAction === 'move' ? '移動' : 'コピー'} 先フォルダ</Form.Label>
                 <Form.Control
                   as="select"
                   value={targetFolderId}
@@ -635,10 +635,10 @@ const FolderEditPage = () => {
           {!moveCopySuccessMessage && (
             <Button
               variant="primary"
-              onClick={moveCopyAction === 'move' ? handleMoveQuestions : handleCopyQuestions} // 複数形に変更
+              onClick={moveCopyAction === 'move' ? handleMoveQuestions : handleCopyQuestions}
               disabled={questionsForMoveCopy.length === 0 || !targetFolderId}
             >
-              {moveCopyAction === 'move' ? '実行' : '実行'}
+              実行
             </Button>
           )}
         </Modal.Footer>

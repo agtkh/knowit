@@ -88,8 +88,9 @@ const PlayPage = () => {
   };
 
   // 2. 表示する問題と解答のテキストを定義
-  const questionText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.answer : currentQuestion.question_text) : '';
-  const answerText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.question_text : currentQuestion.answer) : '';
+  const questionText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.answer : currentQuestion.question_text) : 'error';
+  const answerText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.question_text : currentQuestion.answer) : 'error';
+  const explanationText = currentQuestion ? currentQuestion.explanation : '(解説無し)';
 
   return (
     <Container className="mt-5">
@@ -114,6 +115,7 @@ const PlayPage = () => {
                 ) : (
                   <div>
                     <p className="alert alert-info">{answerText}</p>
+                    <p className="alert alert-secondary">{explanationText}</p>
                     <Button variant="success" className="me-2" onClick={() => handleAnswer(true)}>
                       正解
                     </Button>
