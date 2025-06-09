@@ -15,6 +15,7 @@ export default defineConfig({
         short_name: 'Knowit',
         description: 'The Knowit app is a web application that provides a platform for users to access various features and functionalities.',
         theme_color: '#ffffff',
+        start_url: "https://knowit.gata.email",
         icons: [
           {
             "src": "assets/AppImages/windows11/SmallTile.scale-100.png",
