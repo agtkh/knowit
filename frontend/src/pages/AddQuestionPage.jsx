@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Form, Button, Alert, Spinner, OverlayTrigger, Popover } from 'react-bootstrap';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
@@ -11,9 +11,28 @@ const AddQuestionPage = () => {
   const [explanation, setExplanation] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false); // ★ AI生成中の状態
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [folderName, setFolderName] = useState('');
+  const [includeFolderName, setIncludeFolderName] = useState(true);
 
-  // ★ AIで問題文と解説を生成する関数
+  const questionInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchFolderName = async () => {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        const response = await axios.get(`/api/folders/${folderId}`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        setFolderName(response.data.folder_name);
+      } catch (err) {
+        console.error("フォルダ名の取得に失敗しました:", err);
+      }
+    };
+    fetchFolderName();
+  }, [folderId]);
+
+
   const handleGenerateQuestion = async () => {
     if (!answer.trim()) {
       setError('AIで生成するには、まず回答を入力してください。');
@@ -26,11 +45,12 @@ const AddQuestionPage = () => {
       const authToken = localStorage.getItem('authToken');
       const response = await axios.post('/api/gemini/generate-question', {
         answer: answer,
+        folderName: folderName,
+        includeFolderName: includeFolderName,
       }, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
-      // AIの応答をフォームにセット
       setQuestionText(response.data.question_text || '');
       setExplanation(response.data.explanation || '');
 
@@ -55,16 +75,29 @@ const AddQuestionPage = () => {
 
     try {
       const authToken = localStorage.getItem('authToken');
+      // ===== ★ ここを修正します =====
       await axios.post(`/api/folders/${folderId}/questions`, {
         question_text: questionText,
         answer: answer,
         explanation: explanation,
-        folder_id: folderId,
+        folder_id: parseInt(folderId, 10), // この行を戻しました
       }, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      setSuccessMessage('質問を追加しました。');
-      setTimeout(() => navigate(`/folders/${folderId}/edit`), 1500);
+      
+      setSuccessMessage('質問を追加しました。次の質問をどうぞ！');
+      
+      setQuestionText('');
+      setAnswer('');
+      setExplanation('');
+      setIncludeFolderName(true);
+
+      questionInputRef.current?.focus();
+      
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 2500);
+
     } catch (err) {
       console.error('質問の追加に失敗しました:', err);
       const message = err.response?.data?.message || '質問の追加に失敗しました。';
@@ -72,9 +105,19 @@ const AddQuestionPage = () => {
     }
   };
 
+  const folderNamePopover = (
+    <Popover id="popover-basic">
+      <Popover.Header as="h3">テーマを考慮した生成</Popover.Header>
+      <Popover.Body>
+        このスイッチをONにすると、現在のフォルダ名「<strong>{folderName}</strong>」をテーマとしてAIに伝え、より関連性の高い問題文を生成しようと試みます。
+      </Popover.Body>
+    </Popover>
+  );
+
   return (
     <Container className="mt-5">
       <h1>質問を追加</h1>
+      <p>現在のフォルダ: <strong>{folderName}</strong></p>
       <Link to={`/folders/${folderId}/edit`} className="mb-3 btn btn-secondary">
         フォルダに戻る
       </Link>
@@ -84,6 +127,7 @@ const AddQuestionPage = () => {
         <Form.Group className="mb-3" controlId="formQuestionText">
           <Form.Label>質問</Form.Label>
           <Form.Control
+            ref={questionInputRef}
             as="textarea"
             rows={3}
             placeholder="質問を入力してください"
@@ -94,7 +138,6 @@ const AddQuestionPage = () => {
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formAnswer">
-          {/* ★ ラベルとボタンを横並びにする */}
           <div className="d-flex justify-content-between align-items-center">
             <Form.Label className="mb-0">回答</Form.Label>
             <Button
@@ -104,13 +147,8 @@ const AddQuestionPage = () => {
               disabled={isGenerating || !answer.trim()}
             >
               {isGenerating ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                  <span className="ms-1">生成中...</span>
-                </>
-              ) : (
-                '🤖 AIで問題文と解説を生成'
-              )}
+                <><Spinner as="span" animation="border" size="sm" /> 生成中...</>
+              ) : ( '🤖 AIで問題文と解説を生成' )}
             </Button>
           </div>
           <Form.Control
@@ -120,6 +158,21 @@ const AddQuestionPage = () => {
             onChange={(e) => setAnswer(e.target.value)}
             required
           />
+        </Form.Group>
+        
+        <Form.Group className="mb-3" controlId="formIncludeFolderName">
+          <Form.Check 
+            type="switch"
+            id="include-folder-name-switch"
+            label="フォルダ名をテーマとしてAIに伝える"
+            checked={includeFolderName}
+            onChange={(e) => setIncludeFolderName(e.target.checked)}
+          />
+          <OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={folderNamePopover}>
+            <Button variant="link" className="p-0 ms-2" style={{ textDecoration: 'none' }}>
+              (?)
+            </Button>
+          </OverlayTrigger>
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formExplanation">
