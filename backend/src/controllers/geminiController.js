@@ -1,34 +1,44 @@
-const { GoogleGenAI, createUserContent, createPartFromUri } = require("@google/genai");
+const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({ apiKey: process.env.KNOWIT_GEMINI_API_KEY });
 const model = "gemini-2.0-flash-001";
 
 const getQuestionTextAndExplanationFromAnswer = async (req, res) => {
     try {
-        // ★ リクエストボディから新しいパラメータを受け取る
         const { answer, folderName, includeFolderName } = req.body;
 
-        // ★ システムプロンプトを動的に構築
-        let systemInstruction = `あなたはユーザーが与えた回答から、一問一答形式のクイズ問題文とその解説を生成するAIです。
-        出力はPlainTextのJson形式で、{"question_text": "*", "explanation": "*"}の形式で行ってください。配列などは許しません。
-        生成する問題文は、ユーザーが提供した回答やその一部をできるだけ含まないように工夫し、回答が一つに絞れるような内容にしてください。`;
+        // ===== ★ システムプロンプトをより厳密な指示に修正 =====
+        let systemInstruction = `あなたは、ユーザーが指定した単語や語句が「正解」となるような、高品質な一問一答形式のクイズを生成する専門家AIです。
 
-        // フォルダ名を含めるオプションが有効な場合、指示を追加
+# 指示
+- ユーザーが与えた「回答」が、唯一の正解となるような「問題文」を1つ生成してください。
+- 問題文に対応する「解説」も生成してください。
+- 生成する問題文には、ユーザーが与えた「回答」の単語やその一部を、可能な限り含めないでください。
+
+# 禁止事項
+- **選択肢問題の禁止:** 「次のうちどれ？」のような、選択肢を提示する問題は絶対に作成しないでください。
+- **説明問題の禁止:** 「〜について説明せよ」「〜とは何か」のような、記述式の問題は作成しないでください。生成される問題の答えは、必ずユーザーが与えた「回答」そのものである必要があります。
+- **曖昧な問題の禁止:** 答えが複数考えられるような曖昧な問題は作成しないでください。
+
+# 出力形式
+- 必ず以下のキーを持つJSON形式で、プレーンテキストとして出力してください。
+- JSON以外の説明や前置き、マークダウンの\`\`\`json\`\`\`などは一切含めないでください。
+{"question_text": "生成した問題文", "explanation": "生成した解説"}
+`;
+
         if (includeFolderName && folderName && folderName.trim() !== '') {
-            systemInstruction += `\n特に、あなたは「${folderName}」というテーマに沿った問題を作成する専門家です。そのテーマに関する問題を作成してください。`;
+            systemInstruction += `\n# 追加テーマ\n- 今回は特に「${folderName}」というテーマに沿った問題を作成してください。`;
         }
 
         const response = await ai.models.generateContent({
             model: model,
             contents: answer,
             config: {
-                systemInstruction: systemInstruction, // ★ 動的に生成した指示を渡す
+                systemInstruction: systemInstruction,
                 maxOutputTokens: 200,
-                // temperature: 0.5,
             },
         });
 
-        // 応答の処理は変更なし
         let aiResponseText = response.text;
 
         if (!aiResponseText || aiResponseText.length === 0) {
