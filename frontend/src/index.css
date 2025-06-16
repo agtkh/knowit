@@ -1,0 +1,12 @@
+/* iOSの入力時自動ズームを防ぐための設定 */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px;
+}
