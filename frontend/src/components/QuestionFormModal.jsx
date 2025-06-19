@@ -95,7 +95,15 @@ const QuestionFormModal = ({ show, onHide, question, folderId, folderName, onSav
       }
       
       onSave(); // 親コンポーネントのデータ更新をトリガー
-      onHide(); // モーダルを閉じる
+      if (isEditMode) {
+        onHide(); // 編集モードの場合はモーダルを閉じる
+      } else {
+        // 追加モードの場合はモーダルを開いたままフォームをリセット
+        setQuestionText('');
+        setAnswer('');
+        setExplanation('');
+        questionInputRef.current?.focus(); // 最初のフィールドにフォーカス
+      }
 
     } catch (err) {
       console.error('質問の保存に失敗しました:', err);
@@ -121,7 +129,7 @@ const QuestionFormModal = ({ show, onHide, question, folderId, folderName, onSav
         <Modal.Title>{isEditMode ? '質問を編集' : '質問を追加'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="formQuestionText">
             <Form.Label>質問</Form.Label>
@@ -188,7 +196,7 @@ const QuestionFormModal = ({ show, onHide, question, folderId, folderName, onSav
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>
-          キャンセル
+          閉じる
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={isSaving}>
           {isSaving ? <><Spinner as="span" animation="border" size="sm" /> 保存中...</> : '保存'}
