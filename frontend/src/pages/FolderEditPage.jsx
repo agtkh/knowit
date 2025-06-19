@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import moment from 'moment';
 import DataTable from 'react-data-table-component';
+import QuestionFormModal from '../components/QuestionFormModal';
 
 const FolderEditPage = () => {
   const { id: folderId } = useParams();
@@ -44,6 +45,9 @@ const FolderEditPage = () => {
   const [showQuestionDetailModal, setShowQuestionDetailModal] = useState(false);
   const [selectedQuestionDetail, setSelectedQuestionDetail] = useState(null);
 
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+
 
   const fetchFolderDetails = async () => {
     try {
@@ -81,6 +85,29 @@ const FolderEditPage = () => {
   useEffect(() => {
     fetchFolderDetails();
   }, [folderId]);
+
+  // ★ 質問追加モーダルを開くハンドラ
+  const handleShowAddQuestionModal = () => {
+    setEditingQuestion(null);
+    setShowQuestionModal(true);
+  };
+
+  // ★ 質問編集モーダルを開くハンドラ
+  const handleShowEditQuestionModal = (question) => {
+    setEditingQuestion(question);
+    setShowQuestionModal(true);
+  };
+
+  // ★ モーダルを閉じるハンドラ
+  const handleCloseQuestionModal = () => {
+    setShowQuestionModal(false);
+    setEditingQuestion(null);
+  };
+
+  // ★ 保存後のコールバック
+  const handleSaveQuestion = () => {
+    fetchFolderDetails(); // 質問リストを再取得して更新
+  };
 
   const handleFolderNameChange = (e) => {
     setFolderName(e.target.value);
@@ -405,11 +432,10 @@ const FolderEditPage = () => {
               回答
             </Button>
             <Button
-              as={Link}
-              to={`/questions/${row.id}/edit`}
               variant="primary"
               size="sm"
               className="me-1"
+              onClick={() => handleShowEditQuestionModal(row)}
             >
               編集
             </Button>
@@ -536,7 +562,7 @@ const FolderEditPage = () => {
               </Button>
             </>
           )}
-          <Button as={Link} to={`/folders/${folderId}/add-question`} variant="success" className="me-2">
+          <Button variant="success" className="me-2" onClick={handleShowAddQuestionModal}>
             質問を追加
           </Button>
           <Button as={Link} to="/folders">
@@ -560,6 +586,16 @@ const FolderEditPage = () => {
         onSelectedRowsChange={handleRowSelected} // 選択された行の変更を監視
         clearSelectedRows={toggledClearRows} // 選択状態をリセットするためのトリガー
         onRowClicked={handleShowQuestionDetailModal} // 行をクリックしたときの処理
+      />
+
+      {/* ★ QuestionFormModal をレンダリング */}
+      <QuestionFormModal
+        show={showQuestionModal}
+        onHide={handleCloseQuestionModal}
+        question={editingQuestion}
+        folderId={folderId}
+        folderName={folderName}
+        onSave={handleSaveQuestion}
       />
 
       {/* 質問削除確認モーダル */}

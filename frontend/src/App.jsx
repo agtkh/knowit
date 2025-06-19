@@ -7,8 +7,6 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import FolderListPage from './pages/FolderListPage';
 import FolderEditPage from './pages/FolderEditPage';
-import AddQuestionPage from './pages/AddQuestionPage';
-import QuestionEditPage from './pages/QuestionEditPage';
 import PlayStartPage from './pages/PlayStartPage';
 import PlayPage from './pages/PlayPage'; 
 import PlayResultPage from './pages/PlayResultPage';
@@ -69,10 +67,8 @@ const App = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/folders" element={isLoggedIn ? <FolderListPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/folders/:id/edit" element={isLoggedIn ? <FolderEditPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/folders/:id/add-question" element={isLoggedIn ? <AddQuestionPage /> : <LoginPage onLoginSuccess={handleLoginSuccess} />} /> 
           {isLoggedIn && (
             <>
-              <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
               <Route path="/play/start/:folderId" element={<PlayStartPage />} />
               <Route path="/play/:folderId" element={<PlayPage />} />
               <Route path="/play/result" element={<PlayResultPage />} />
