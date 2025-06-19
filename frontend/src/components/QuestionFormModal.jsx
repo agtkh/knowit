@@ -10,7 +10,7 @@ const QuestionFormModal = ({ show, onHide, question, folderId, folderName, onSav
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [includeFolderName, setIncludeFolderName] = useState(true);
+  const [includeFolderName, setIncludeFolderName] = useState(false);
 
   const questionInputRef = useRef(null);
 
