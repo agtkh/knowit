@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import QuestionFormModal from '../components/QuestionFormModal';
 
 const PlayPage = () => {
   const { folderId } = useParams();
@@ -16,13 +17,23 @@ const PlayPage = () => {
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const [questionCount] = useState(parseInt(searchParams.get('count') || 10, 10));
   
-  // 1. URLから出題モードを取得
-  const [playMode] = useState(searchParams.get('mode') || 'question-to-answer'); // デフォルトは 'question-to-answer'
+  const [playMode] = useState(searchParams.get('mode') || 'question-to-answer');
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [folderName, setFolderName] = useState('');
 
   useEffect(() => {
-    const fetchPlayQuestions = async () => {
+    const fetchPlayData = async () => {
       try {
+        setLoading(true);
         const authToken = localStorage.getItem('authToken');
+        
+        // フォルダ名を取得 (編集モーダルで必要)
+        const folderResponse = await axios.get(`/api/folders/${folderId}`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setFolderName(folderResponse.data.folder_name);
+
         const response = await axios.get(`/api/folders/play/${folderId}?limit=${questionCount}`, {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -32,15 +43,15 @@ const PlayPage = () => {
         if (response.data.length === 0) {
           setError('このフォルダには問題がありません。');
         }
-        setLoading(false);
-      } catch (error) {
-        console.error('Play 問題の取得に失敗しました:', error);
-        setError('Play 問題の取得に失敗しました。');
+      } catch (err) {
+        console.error('Playデータの取得に失敗しました:', err);
+        setError('Playデータの取得に失敗しました。');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchPlayQuestions();
+    fetchPlayData();
   }, [folderId, questionCount]);
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -52,7 +63,6 @@ const PlayPage = () => {
   const handleAnswer = async (isCorrect) => {
     if (!currentQuestion) return;
 
-    // 結果画面に渡すデータは、表示モードに関わらず元の形式で保存する
     const answeredQuestion = {
       questionId: currentQuestion.id,
       questionText: currentQuestion.question_text,
@@ -87,7 +97,36 @@ const PlayPage = () => {
     navigate('/play/result', { state: { answeredQuestions } });
   };
 
-  // 2. 表示する問題と解答のテキストを定義
+  // --- 編集機能のためのハンドラ ---
+  const handleShowEditModal = () => {
+    setEditingQuestion(currentQuestion);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingQuestion(null);
+    setShowEditModal(false);
+  };
+
+  const handleSaveQuestion = () => {
+    // 編集された質問を再取得して、現在のリストを更新
+    const fetchCurrentQuestion = async () => {
+        try {
+            const authToken = localStorage.getItem('authToken');
+            const response = await axios.get(`/api/questions/${currentQuestion.id}`, {
+                 headers: { Authorization: `Bearer ${authToken}` },
+            });
+            const updatedQuestion = response.data;
+            const newQuestions = [...questions];
+            newQuestions[currentQuestionIndex] = updatedQuestion;
+            setQuestions(newQuestions);
+        } catch(err) {
+            console.error("更新された質問の再取得に失敗しました", err);
+        }
+    }
+    fetchCurrentQuestion();
+    handleCloseEditModal();
+  };
   const questionText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.answer : currentQuestion.question_text) : 'error';
   const answerText = currentQuestion ? (playMode === 'answer-to-question' ? currentQuestion.question_text : currentQuestion.answer) : 'error';
   const explanationText = currentQuestion ? currentQuestion.explanation : '(解説無し)';
@@ -96,7 +135,10 @@ const PlayPage = () => {
     <Container className="mt-5">
       <Card>
         <Card.Header>
-          <h3>問題 {currentQuestionIndex + 1} / {questions.length}</h3>
+          <div className="d-flex justify-content-between align-items-center">
+            <h3 className="mb-0">問題 {currentQuestionIndex + 1} / {questions.length}</h3>
+            {showAnswer && (<Button variant="secondary" onClick={handleShowEditModal}>編集</Button>)}
+          </div>
         </Card.Header>
         <Card.Body className="text-center">
           {loading ? (
@@ -105,7 +147,6 @@ const PlayPage = () => {
             <div className="text-danger">{error}</div>
           ) : currentQuestion ? (
             <>
-              {/* 3. モードに応じて入れ替えたテキストを表示 */}
               <h2>{questionText}</h2>
               <div className="mt-3">
                 {!showAnswer ? (
@@ -119,7 +160,7 @@ const PlayPage = () => {
                     <Button variant="success" className="me-2" onClick={() => handleAnswer(true)}>
                       正解
                     </Button>
-                    <Button variant="danger" onClick={() => handleAnswer(false)}>
+                    <Button variant="danger" className="me-2" onClick={() => handleAnswer(false)}>
                       不正解
                     </Button>
                   </div>
@@ -136,6 +177,17 @@ const PlayPage = () => {
           </Button>
         </Card.Footer>
       </Card>
+      
+      {editingQuestion && (
+        <QuestionFormModal
+          show={showEditModal}
+          onHide={handleCloseEditModal}
+          question={editingQuestion}
+          folderId={folderId}
+          folderName={folderName}
+          onSave={handleSaveQuestion}
+        />
+      )}
     </Container>
   );
 };
